@@ -1,0 +1,27 @@
+# info and a little history of the creation of swextract
+
+The IRIX filesystem is unique. SGI decided they would use the EFS filesystem to write their disc images, which is one-of-a-kind. Linux has the ability to recognize and read EFS, it is written in the kernel, however it is disabled by default.
+I have used the tool efs2tar available on https://github.com/sophaskins/efs2tar to convert the EFS disc image to a tarball and used tar to extract the contents.
+
+From there abenson and I did some research on the IRIX software installer files, thanks a few gracious members of the Void
+Linux community who are former IRIX users/admins, and we found the .idb files are ASCII database files that list the contents
+of .sw files, which contain the entire filesystem, permissions, etc, all compressed and compiled into a single file.
+
+Using the contents and data from the .idb file, we were able to successfully extract 'ls' from 'eoe.sw'.
+
+The contents of eoe.sw look like this: f 0755 root sys sbin/ls xlv55/kudzu-apr12/work/eoe/cmd/ls/ls eoe.sw.base sum(41952) size(31888) off(6110908) needrqs cmpsize(18966)
+As you notice, there are a few things we can variable-ize: mainly cmpsize (compressed-size), off (offset), and strlen (path/filename as a character count).
+
+Running `dd if=eoe.sw of=/test/irix/ls.Z skip=$((${offset}+2+${strlen})) bs=1 count=${cmpsize}` gives us 'test/irix/ls.Z: compress'd data 16 bits'
+Running `uncompress test/irix/ls.Z` leaves us with a file called 'ls'.
+
+Running `file sbin/ls` shows "ls: ELF 32-bit MSB executable, MIPS, N32 MIPS-III version 1 (SYSV), dynamically linked, interpreter /lib32/libc.so.1, stripped"
+YAY! Problem one solved. We have practical application for extracting files from SGI IRIX EFS-formatted Installer discs.
+
+This script is used to facilitate the process of extraction from .sw files.  It has been tested with found1/dist/eoe.sw, using
+found1/dist/eoe.idb as the idb file. I have been able to extract the entire base filesystem using this script.
+
+NOTE: If you notice, I am not gathering the symlinks as that is extra coding, and honestly, they don't matter here as we're
+not using them at all.  I've only gathered files.
+
+I have also included some debugging lines to allow verbose output.
