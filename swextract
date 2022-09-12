@@ -6,6 +6,21 @@ help() {
         exit 0
 }
 
+debug() {
+        echo ====================
+        echo filename      = $filename
+        echo path          = $path
+        echo path/filename = $path/$filename
+        echo strlenlong    = $strlenlong
+        echo strlen        = $strlen
+        echo cmpsize       = $cmpsize
+        echo offset        = $offset
+        echo outpath       = $outpath
+        echo idbfile       = $idbfile
+        echo swfile        = $swfile
+        echo wdir          = $wdir
+}
+
 if [ $# -eq 0 ]; then
 	help
 fi
@@ -34,17 +49,6 @@ cat ${idbfile} | while read line; do
         uncompress ${filename}.Z 2>/dev/null
         rm -f ${filename}.Z
         cd ${outpath}
-#       echo ====================
-#       echo $filename
-#       echo $path
-#       echo $path/$filename
-#       echo $strlenlong
-#       echo strlen $strlen
-#       echo cmpsize $cmpsize
-#       echo offset $offset
-#       echo $outpath
-#       echo $idbfile
-#       echo $swfile
-#       echo $wdir
+#       debug
 done
 exit 0
